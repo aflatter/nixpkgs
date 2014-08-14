@@ -13,10 +13,13 @@ let
 in
 
 stdenv.mkDerivation rec {
-  name = "ruby-2.1.2";
+  version = with passthru; "${majorVersion}.${minorVersion}";
+
+  name = "ruby-${version}";
+
   src = fetchurl {
     url = "http://cache.ruby-lang.org/pub/ruby/2.1/${name}.tar.bz2";
-    sha256 = "6948b02570cdfb89a8313675d4aa665405900e27423db408401473f30fc6e901";
+    sha256 = "00g9qq7z6wql804b8ga24w7901alcsmd8x9n66l8kyydf0jv0j39";
   };
 
   # Have `configure' avoid `/usr/bin/nroff' in non-chroot builds.
