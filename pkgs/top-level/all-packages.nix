@@ -3820,8 +3820,6 @@ let
 
   rake = rubyLibs.rake;
 
-  rubySqlite3 = callPackage ../development/ruby-modules/sqlite3 { };
-
   rubygemsFun = ruby: builderDefsPackage (import ../development/interpreters/ruby/rubygems.nix) {
     inherit ruby makeWrapper;
   };
