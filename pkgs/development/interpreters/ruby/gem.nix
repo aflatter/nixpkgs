@@ -31,8 +31,12 @@ in ruby.stdenv.mkDerivation (attrs // {
     if test -d $src; then
       cd $src
     else
-      gem unpack $src --target=gem-build
-      cd gem-build/*
+      cp $src ${attrs.name}.gem
+      gem unpack ${attrs.name}.gem
+      rm ${attrs.name}.gem
+      mv ${attrs.name} gem-build
+      cd gem-build
+      sourceRoot=`pwd`
     fi
   '';
 
@@ -44,9 +48,23 @@ in ruby.stdenv.mkDerivation (attrs // {
 
   installPhase = ''
     runHook preInstall
+
+    # NOTE: This does NOT build the unpacked gem, but installs $src directly.
+    #       Gems that have not been downloaded from rubygems.org may need a
+    #       separate buildPhase.
+    #       --ignore-dependencies is necessary as rubygems otherwise always
+    #       connects to the repository, thus breaking pure builds.
     GEM_HOME=$out/${ruby.gemPath} \
-      gem install -p http://nodtd.invalid \
-      --build-root / -n "$out/bin" "$src" $gemFlags -- $buildFlags
+      gem install \
+      --local \
+      --force \
+      --http-proxy "http://nodtd.invalid" \
+      --ignore-dependencies \
+      --build-root "/" \
+      --bindir "$out/bin" \
+      --backtrace \
+      $src $gemFlags -- $buildFlags
+
     rm -frv $out/${ruby.gemPath}/cache # don't keep the .gem file here
 
     for prog in $out/bin/*; do
@@ -62,8 +80,8 @@ in ruby.stdenv.mkDerivation (attrs // {
     done
 
     # looks like useless files which break build repeatability and consume space
-    rm $out/${ruby.gemPath}/doc/*/*/created.rid || true
-    rm $out/${ruby.gemPath}/gems/*/ext/*/mkmf.log || true
+    rm -fv $out/${ruby.gemPath}/doc/*/*/created.rid || true
+    rm -fv $out/${ruby.gemPath}/gems/*/ext/*/mkmf.log || true
 
     mkdir -p $out/nix-support
 
