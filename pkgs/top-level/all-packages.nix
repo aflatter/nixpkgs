@@ -3812,6 +3812,10 @@ let
     ruby = myruby;
   };
 
+  loadRubyEnv = (callPackage ../development/interpreters/ruby/bundix.nix {
+    inherit rubyLibsWith;
+  }).loadRubyEnv;
+
   ruby18Libs = rubyLibsWith ruby18;
   ruby19Libs = rubyLibsWith ruby19;
   ruby2Libs = rubyLibsWith ruby2;
