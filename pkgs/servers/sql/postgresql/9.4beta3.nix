@@ -1,4 +1,5 @@
-{ stdenv, fetchurl, zlib, readline, libossp_uuid }:
+{ stdenv, fetchurl, zlib, readline, libossp_uuid, openssl}:
+
 
 with stdenv.lib;
 
@@ -12,16 +13,15 @@ stdenv.mkDerivation rec {
     sha256 = "0pdawsmrzwgf2c4g18xlgzv6q34kd8q2p1nxag0xaw4sbdmdilas";
   };
 
-  buildInputs = [ zlib readline ] ++ optionals (!stdenv.isDarwin) [ libossp_uuid ];
+  buildInputs = [ zlib readline openssl ]
+                ++ optionals (!stdenv.isDarwin) [ libossp_uuid ];
 
   enableParallelBuilding = true;
 
   makeFlags = [ "world" ];
 
-  configureFlags = optional (!stdenv.isDarwin)
-    ''
-      --with-ossp-uuid
-    '';
+  configureFlags = [ "--with-openssl" ]
+                   ++ optional (!stdenv.isDarwin) "--with-ossp-uuid";
 
   patches = [ ./disable-resolve_symlinks-94.patch ./less-is-more.patch ];
 
